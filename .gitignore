@@ -1,0 +1,26 @@
+# Credentials — never commit
+*.key
+*.pem
+*.p12
+*.crt
+*.env
+.env.*
+secrets.yml
+credentials.yml
+
+# PCAPs and raw logs — store locally only
+*.pcap
+*.pcapng
+*.log
+*.evtx
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor artifacts
+*.swp
+*~
+.vscode/
+.idea/
