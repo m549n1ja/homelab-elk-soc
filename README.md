@@ -139,10 +139,4 @@ Full screenshot index with phase mapping: [evidence/EVIDENCE_INDEX.md](evidence/
 
 ---
 
-## Resume Bullet
-
-> Deployed enterprise-grade ELK 8.x SIEM ingesting 29,000+ events from Windows, Linux, and firewall sources — wrote 10 custom KQL detection rules mapped to MITRE ATT&CK with verified alert generation.
-
----
-
-*Built by John Medina | [github.com/m549n1ja](https://github.com/m549n1ja) | Post-GCIH | 2026*
+*Built by John Medina | [github.com/m549n1ja](https://github.com/m549n1ja) | 
