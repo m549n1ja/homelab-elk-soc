@@ -1,30 +1,46 @@
-# homelab-elk-soc
-## Enterprise-grade ELK Stack SIEM | SOC Detection Lab
+# Homelab ELK SOC
 
-I built this lab because I wanted to understand what a SOC analyst actually works with every day — not just read about it. Coming from a background where operational readiness and attention to detail are non-negotiable, I wanted to prove I could stand up a real detection environment from scratch: configure the stack, pull logs from multiple sources, write rules that actually fire, and document every step the way you would in a real environment. This repo is that proof. It's a single-node ELK 8.x SIEM ingesting logs from a Windows endpoint (with Sysmon), a Linux endpoint, and an OPNsense firewall — 29,000+ events, 10 custom KQL detection rules mapped to MITRE ATT&CK, and 3 Kibana dashboards. Everything is built on commodity hardware running VMware. No cloud shortcuts.
+## ELK Stack SIEM and Detection Lab
+
+I built this lab because I wanted to understand what a SOC analyst actually works with every day — not just read about it. Coming from a background where operational readiness and attention to detail are non-negotiable, I wanted to prove that I could stand up a real detection environment from scratch: configure the stack, pull logs from multiple sources, write rules that actually fire, and document the process the way I would in a real environment.
+
+This repository is the result: a single-node ELK 8.x SIEM ingesting logs from a Windows endpoint with Sysmon, a Linux endpoint, and an OPNsense firewall. The lab currently contains 29,000+ indexed events, 10 custom KQL detection rules mapped to MITRE ATT&CK, and 3 Kibana dashboards. Everything was built on commodity hardware using VMware, with no cloud shortcuts.
+
+---
+
+## Project Goals
+
+The purpose of this project was to build a practical SOC-style monitoring environment and use it to answer four questions:
+
+1. Can I deploy and configure the core Elastic Stack components myself?
+2. Can I collect useful telemetry from Windows, Linux, and firewall sources?
+3. Can I write detection logic that produces real alerts?
+4. Can I document the build clearly enough that another analyst or hiring manager can understand what was done and why?
+
+This is not meant to be a production blueprint. It is a hands-on lab focused on SIEM fundamentals, log ingestion, detection logic, alert validation, and evidence-based documentation.
 
 ---
 
 ## Skills Demonstrated
 
-| Skill | How This Repo Proves It |
-|-------|------------------------|
-| SIEM deployment and configuration | Stood up Elasticsearch, Logstash, and Kibana 8.x from scratch on Ubuntu Server — configured pipelines, data views, and index patterns |
-| Log ingestion pipeline | Winlogbeat, Filebeat, and Auditbeat all shipping to Logstash 5044 → Elasticsearch 9200 with verified index growth |
-| Windows endpoint visibility | Sysmon64 (SwiftOnSecurity config) + Winlogbeat — Sysmon events, Security events, and audit policy tuned for 4625 |
-| Linux endpoint visibility | Filebeat (system logs) + Auditbeat (file integrity monitoring on /etc/passwd) — both confirmed in ELK |
-| Network/firewall log ingestion | OPNsense syslog over UDP 514 → Filebeat → Logstash — firewall block events indexed and queryable |
-| Detection engineering | 10 custom KQL detection rules — logic, thresholds, and index targets written by hand, not imported |
-| MITRE ATT&CK mapping | All 10 rules tagged to specific sub-techniques across Credential Access, Persistence, Execution, Lateral Movement, C2, Impact |
-| Alert verification | Rules 1 and 8 verified firing in Kibana Security — screenshots in evidence/ |
-| Dashboard building | 3 Kibana dashboards built: Security Overview, Authentication Activity, Network Traffic |
-| Documentation | Every phase documented with purpose, commands, lessons learned, and screenshot evidence |
+| Skill Area | How This Lab Demonstrates It |
+|---|---|
+| SIEM deployment | Installed and configured Elasticsearch, Logstash, and Kibana 8.x on Ubuntu Server |
+| Log ingestion | Forwarded Windows, Linux, and firewall logs into ELK using Winlogbeat, Filebeat, Auditbeat, and syslog |
+| Windows visibility | Collected Windows Security events and Sysmon telemetry from a Windows 10 endpoint |
+| Linux visibility | Collected Linux system logs and Auditbeat file integrity monitoring data |
+| Network visibility | Forwarded OPNsense firewall syslog events into the ELK pipeline |
+| Detection engineering | Created 10 custom KQL detection rules for common SOC use cases |
+| MITRE mapping | Mapped each detection rule to a relevant MITRE ATT&CK technique or sub-technique |
+| Alert validation | Confirmed selected rules firing in Kibana Security and captured screenshot evidence |
+| Dashboarding | Built dashboards for security overview, authentication activity, and network traffic |
+| Documentation | Recorded build steps, lessons learned, screenshots, and production improvements |
 
 ---
 
 ## Lab Architecture
 
-```
+```text
                         192.168.10.0/24
                    ┌─────────────────────────┐
                    │                         │
@@ -52,91 +68,138 @@ I built this lab because I wanted to understand what a SOC analyst actually work
 ## Technology Stack
 
 | Component | Version | Purpose |
-|-----------|---------|---------|
-| Elasticsearch | 8.x | Log storage and indexing |
-| Logstash | 8.x | Log ingestion pipeline (Beats input, ES output) |
-| Kibana | 8.x | Visualization, detection rules, dashboards |
-| Winlogbeat | 8.19.13 | Windows event log shipping (Security + Sysmon) |
-| Sysmon64 | Latest | Windows process and network telemetry |
-| Filebeat | 8.x | Linux system log shipping + OPNsense syslog relay |
-| Auditbeat | 8.x | Linux file integrity monitoring and auditd |
-| OPNsense | 26.1 | Perimeter firewall, syslog source |
-| VMware Workstation | — | Hypervisor on Ryzen 9 host |
-| Ubuntu Server 24.04 | — | ELK-SIEM OS |
-| Ubuntu Desktop 24.04 | — | LINUX-ENDPOINT OS |
-| Windows 10 Pro | — | WIN10-ENDPOINT OS |
+|---|---:|---|
+| Elasticsearch | 8.x | Stores and indexes security events |
+| Logstash | 8.x | Receives, tags, and forwards log data |
+| Kibana | 8.x | Dashboards, searches, detections, and alerts |
+| Winlogbeat | 8.19.13 | Ships Windows Security and Sysmon events |
+| Sysmon64 | Latest | Adds detailed Windows process and network telemetry |
+| Filebeat | 8.x | Ships Linux system logs and relayed firewall syslog |
+| Auditbeat | 8.x | Provides Linux audit and file integrity monitoring |
+| OPNsense | 26.1 | Firewall and syslog source |
+| VMware Workstation | — | Local virtualization platform |
+| Ubuntu Server 24.04 | — | ELK server operating system |
+| Ubuntu Desktop 24.04 | — | Linux endpoint operating system |
+| Windows 10 Pro | — | Windows endpoint operating system |
 
 ---
 
 ## Log Sources
 
-| Source | Type | Approx. Events/Day | Index Pattern |
-|--------|------|--------------------|---------------|
-| WIN10-ENDPOINT (192.168.10.197) | Windows Security Events (4624, 4625, 4720, 4698, 4672, 7045) | ~500 | `winlogbeat-*` |
-| WIN10-ENDPOINT (192.168.10.197) | Sysmon process/network telemetry | ~200 | `winlogbeat-*` |
-| LINUX-ENDPOINT (192.168.10.155) | Linux system logs (auth, syslog, kern) | ~1,000 | `filebeat-*` |
-| LINUX-ENDPOINT (192.168.10.155) | Auditbeat file integrity + auditd | ~300 | `auditbeat-*` |
-| OPNsense (192.168.10.1) | Firewall block/pass events via syslog UDP 514 | ~500 | `filebeat-*` |
+| Source | Telemetry | Index Pattern | Purpose |
+|---|---|---|---|
+| WIN10-ENDPOINT `192.168.10.197` | Windows Security events | `winlogbeat-*` | Authentication, account activity, privilege events |
+| WIN10-ENDPOINT `192.168.10.197` | Sysmon telemetry | `winlogbeat-*` | Process, command-line, and network visibility |
+| LINUX-ENDPOINT `192.168.10.155` | Linux system logs | `filebeat-*` | Authentication, system, and kernel events |
+| LINUX-ENDPOINT `192.168.10.155` | Auditbeat and FIM events | `auditbeat-*` | Linux audit data and file integrity monitoring |
+| OPNsense `192.168.10.1` | Firewall syslog | `filebeat-*` | Network allow/block activity |
 
-**Total events in ELK as of 2026-04-29: 29,000+**
-
----
-
-## Detection Rules (MITRE ATT&CK Mapped)
-
-| # | Rule Name | Event Code | Severity | MITRE Sub-Technique | Status |
-|---|-----------|------------|----------|---------------------|--------|
-| 1 | Brute Force: Failed Logins | 4625 | Medium | T1110.001 | ✅ VERIFIED FIRING — 20 alerts |
-| 2 | New User Account Created | 4720 | High | T1136.001 | ✅ Active |
-| 3 | Suspicious PowerShell Execution | 4104 | High | T1059.001 | ✅ Active |
-| 4 | New Scheduled Task | 4698 | High | T1053.005 | ✅ Active |
-| 5 | RDP Login from External IP | 4624 + LogonType:10 | Critical | T1021.001 | ✅ Active |
-| 6 | Firewall Deny Spike | OPNsense local0 block | High | T1046 | ✅ Active |
-| 7 | New Service Installed | 7045 | High | T1543.003 | ✅ Active |
-| 8 | Privilege Escalation: Special Logon | 4672 | High | T1068 | ✅ VERIFIED FIRING — 1 alert |
-| 9 | DNS Tunneling Indicator | DNS TXT records | High | T1071.004 | ✅ Active |
-| 10 | File Integrity Alert: /etc/passwd | Auditbeat FIM | High | T1565.001 | ✅ Active |
-
-KQL queries and Sigma YAML skeletons: [rules/kql/](rules/kql/)
+**Current indexed event count:** 29,000+ events as of 2026-04-29.
 
 ---
 
-## Evidence Pack
+## Detection Rules
 
-Full screenshot index with phase mapping: [evidence/EVIDENCE_INDEX.md](evidence/EVIDENCE_INDEX.md)
+| # | Rule Name | Main Signal | Severity | MITRE ATT&CK | Status |
+|---:|---|---|---|---|---|
+| 1 | Brute Force: Failed Logins | Event ID 4625 | Medium | T1110.001 | Verified firing |
+| 2 | New User Account Created | Event ID 4720 | High | T1136.001 | Active |
+| 3 | Suspicious PowerShell Execution | Event ID 4104 | High | T1059.001 | Active |
+| 4 | New Scheduled Task | Event ID 4698 | High | T1053.005 | Active |
+| 5 | RDP Login from External IP | Event ID 4624, Logon Type 10 | Critical | T1021.001 | Active |
+| 6 | Firewall Deny Spike | OPNsense block events | High | T1046 | Active |
+| 7 | New Service Installed | Event ID 7045 | High | T1543.003 | Active |
+| 8 | Privilege Escalation: Special Logon | Event ID 4672 | High | T1068 | Verified firing |
+| 9 | DNS Tunneling Indicator | DNS TXT activity | High | T1071.004 | Active |
+| 10 | File Integrity Alert: `/etc/passwd` | Auditbeat FIM | High | T1565.001 | Active |
 
-35 screenshots covering all 6 phases — ELK stack deployment, endpoint agent configuration, OPNsense syslog integration, all 10 detection rules created, verified alert firing, and all 3 dashboards live.
-
----
-
-## What I Learned
-
-1. **Logstash, not Elasticsearch, is the correct output target for Beat agents in this stack.** I initially had Winlogbeat pointing at port 9200 (Elasticsearch direct). That works in simple setups but you lose pipeline filtering. Fixed it to 5044 (Logstash) — now every log gets tagged by source type before indexing.
-
-2. **cluster.initial_master_nodes can silently break Elasticsearch if it appears twice in the config file.** It was present on lines 74 and 109 in my elasticsearch.yml. ES would start but fail to form the cluster. Lesson: grep your config files before assuming a setting is set once.
-
-3. **Windows Audit Policy is not enabled by default — Event 4625 will not log without it.** You can have Winlogbeat running perfectly and get zero failed login events because Windows isn't generating them. Had to manually configure Advanced Audit Policy for Logon/Logoff.
-
-4. **Kibana's Security detection engine requires the correct data view.** The default `logs-*` view doesn't include winlogbeat or filebeat indices. Created `winlogbeat-*` and `filebeat-*` data views manually and pointed the security engine at the right pattern before rules would return results.
-
-5. **Sysmon must be installed before adding the Microsoft-Windows-Sysmon/Operational channel to winlogbeat.yml.** If the channel doesn't exist when Winlogbeat starts, it logs an error and skips it silently. The fix is order of operations: install Sysmon first, then update the config.
-
-6. **OPNsense syslog uses facility local0 by default.** Knowing this let me write a precise KQL filter for firewall events instead of trying to parse every syslog message. Filtering on `syslog.facility_label: "local0"` cleanly isolates OPNsense traffic.
-
-7. **VMware Tools is not optional if you want to work efficiently.** Copy-paste between the host and VMs is disabled without it. Small thing, but I lost time early on manually re-typing commands from documentation until I installed it.
+Rule logic is being organized under [`rules/kql/`](rules/kql/) with Sigma versions planned under [`rules/sigma/`](rules/sigma/).
 
 ---
 
-## What I'd Do Differently in Production
+## Dashboards Built
 
-1. **Use API keys instead of username/password in Logstash output.** The `beats.conf` pipeline uses `user: elastic` with a password. In production that password has to rotate, and every pipeline breaks when it does. API keys scope the permissions to exactly what Logstash needs and can be revoked individually without touching credentials elsewhere.
-
-2. **Enable SSL certificate validation on the Elasticsearch output.** I used `ssl_verification_mode: "none"` to get the lab running quickly. In a real environment that's a man-in-the-middle waiting to happen — deploy a proper CA or use Elasticsearch's built-in CA and validate the cert chain.
-
-3. **Run Logstash as a dedicated service account with minimal permissions.** In this lab Logstash runs as a standard user. In production it should have read access to pipeline configs and write access to its own log directory — nothing else.
-
-4. **Implement index lifecycle management (ILM) from day one.** Letting indices grow unbounded works fine in a lab with 29,000 events. At enterprise scale with millions of events per day, you need hot/warm/cold tiering and automatic rollover configured before the cluster is under load — not after you've run out of disk.
+| Dashboard | Purpose |
+|---|---|
+| Security Overview | High-level view of notable security events and alert activity |
+| Authentication Activity | Windows and Linux authentication trends, failed logons, and account activity |
+| Network Traffic | OPNsense firewall activity, denied traffic, and network visibility |
 
 ---
 
-*Built by John Medina | [github.com/m549n1ja](https://github.com/m549n1ja) | 
+## Evidence
+
+The repository includes screenshot evidence showing the lab build and validation process, including:
+
+- ELK services running
+- Elasticsearch and Kibana access confirmed
+- Windows endpoint configuration
+- Linux endpoint telemetry
+- OPNsense syslog ingestion
+- Winlogbeat, Filebeat, and Auditbeat indices
+- Sysmon events in Kibana
+- Custom Kibana detection rules
+- Alerts firing
+- Final dashboards
+
+A full evidence index is available here: [`evidence/EVIDENCE_INDEX.md`](evidence/EVIDENCE_INDEX.md)
+
+---
+
+## Key Lessons Learned
+
+### 1. Beat agents should point to Logstash when pipeline control matters
+
+I initially had Winlogbeat sending directly to Elasticsearch on port 9200. That works for simple ingestion, but it bypasses the Logstash pipeline. Moving Beats traffic to Logstash on port 5044 gave me a better place to tag, route, and standardize events before indexing.
+
+### 2. Small Elasticsearch config mistakes can break cluster startup
+
+A duplicated `cluster.initial_master_nodes` entry caused Elasticsearch to start incorrectly. The fix was straightforward, but the lesson was important: verify configuration files carefully before assuming a service problem is caused by the application itself.
+
+### 3. Windows does not log everything by default
+
+Failed logon detection depends on Windows actually generating Event ID 4625. Winlogbeat was working, but the event was not appearing until Advanced Audit Policy was configured correctly.
+
+### 4. Kibana detection rules depend on the right data views
+
+The Security app will not find events if the rules are pointed at the wrong index pattern. Creating and validating the correct `winlogbeat-*`, `filebeat-*`, and `auditbeat-*` data views was required before the rules could return results.
+
+### 5. Sysmon setup order matters
+
+The Sysmon event channel needs to exist before Winlogbeat is configured to collect from it. Installing Sysmon first, then updating the Winlogbeat configuration, avoided silent collection issues.
+
+### 6. Firewall logs are much easier to work with when the source is consistent
+
+OPNsense syslog used the expected facility, which made it easier to isolate firewall events in Kibana and build targeted searches for denied traffic.
+
+---
+
+## What I Would Improve for Production
+
+This lab was built to learn and validate SOC workflows, not to represent a hardened production deployment. In a production environment, I would make the following changes:
+
+1. **Use API keys or a dedicated least-privilege service account for Logstash.**  
+   The lab uses a redacted credential in the Logstash output configuration. A production deployment should avoid broad credentials and use tightly scoped access.
+
+2. **Enable full TLS certificate validation.**  
+   Certificate verification was relaxed during the lab build to move quickly. Production traffic between Logstash and Elasticsearch should validate the certificate chain.
+
+3. **Implement index lifecycle management from the beginning.**  
+   A lab with 29,000 events is manageable. A real environment needs rollover, retention, and storage planning before event volume grows.
+
+4. **Export detection rules and dashboards as version-controlled artifacts.**  
+   Screenshots prove the work was completed, but exported Kibana objects make the project easier to reproduce and review.
+
+5. **Add automated validation scripts.**  
+   Simple checks for service health, listening ports, index growth, and recent events would make the lab easier to maintain and rebuild.
+
+---
+
+## Repository Status
+
+This project is actively being documented and cleaned up for portfolio use. The lab itself is built and producing data; the remaining work is focused on making the repository easier to review, reproduce, and evaluate.
+
+---
+
+Built by **John Medina**  
+GitHub: [m549n1ja](https://github.com/m549n1ja)
