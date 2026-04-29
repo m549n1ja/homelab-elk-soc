@@ -19,7 +19,11 @@ logsource:
 detection:
   selection:
     EventID: 4625
-  condition: selection | count() by TargetUserName > 5
+  condition: selection
+  # Recommended SIEM threshold:
+  # 5 or more failed logons by TargetUserName within 5 minutes.
+  # Apply this as a threshold rule in Kibana Security — Sigma itself
+  # does not support aggregation-based conditions in standard rule format.
 falsepositives:
   - Legitimate users repeatedly mistyping their password
   - Service accounts with stale credentials retrying authentication automatically

@@ -129,7 +129,7 @@ Edit `/etc/elasticsearch/elasticsearch.yml`:
 cluster.name: homelab-soc
 node.name: elk-siem
 
-# Bind to the local interface only (single node lab)
+# Bind to all interfaces so Kibana and lab agents can reach Elasticsearch on the lab LAN
 network.host: 0.0.0.0
 http.port: 9200
 
@@ -152,7 +152,7 @@ Create `/etc/elasticsearch/jvm.options.d/heap.options`:
 -Xmx4g
 ```
 
-Set heap to 50% of available RAM (8 GB of 16 GB in this lab). Never exceed 32 GB or half of available RAM.
+This lab uses a conservative 4 GB Elasticsearch heap on a 16 GB ELK-SIEM VM. In production, heap sizing should be based on workload and Elastic guidance, with the common ceiling of not exceeding roughly half of available RAM or 32 GB, whichever is smaller.
 
 ### 2.5 Enable and Start Elasticsearch
 

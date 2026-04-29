@@ -73,7 +73,7 @@ This is not meant to be a production blueprint. It is a hands-on lab focused on 
 | Logstash | 8.x | Receives, tags, and forwards log data |
 | Kibana | 8.x | Dashboards, searches, detections, and alerts |
 | Winlogbeat | 8.19.13 | Ships Windows Security and Sysmon events |
-| Sysmon64 | Latest | Adds detailed Windows process and network telemetry |
+| Sysmon64 | Current at install time | Adds detailed Windows process and network telemetry |
 | Filebeat | 8.x | Ships Linux system logs and relayed firewall syslog |
 | Auditbeat | 8.x | Provides Linux audit and file integrity monitoring |
 | OPNsense | 26.1 | Firewall and syslog source |
@@ -209,7 +209,7 @@ This lab was built to learn and validate SOC workflows, not to represent a harde
 
 ## Repository Status
 
-This project is actively being documented and cleaned up for portfolio use. The lab itself is built and producing data; the remaining work is focused on making the repository easier to review, reproduce, and evaluate.
+This project is actively maintained as a portfolio SOC lab. The core lab, documentation, detection logic, validation scripts, and evidence index are in place. Remaining work is focused on exporting Kibana dashboards/rules as NDJSON and fully validating every detection with dedicated alert screenshots.
 
 ---
 
