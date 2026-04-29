@@ -1,0 +1,31 @@
+title: Windows New Local User Account Created
+id: a1b2c3d4-0002-4e5f-8a9b-000000000002
+status: experimental
+description: >
+  Detects the creation of a new local Windows user account via Event ID 4720.
+  Attackers create local accounts as a persistence mechanism after gaining initial access.
+  Any account creation outside an authorized provisioning process should be investigated.
+references:
+  - https://attack.mitre.org/techniques/T1136/001/
+  - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-4720
+author: John Medina
+date: 2026/04/29
+tags:
+  - attack.persistence
+  - attack.t1136.001
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4720
+  condition: selection
+falsepositives:
+  - Authorized IT provisioning during onboarding
+  - Software installers creating local service accounts
+  - Windows feature installs adding system accounts
+fields:
+  - TargetUserName
+  - SubjectUserName
+  - SubjectDomainName
+level: high

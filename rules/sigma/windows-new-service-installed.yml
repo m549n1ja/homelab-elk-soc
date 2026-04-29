@@ -1,0 +1,43 @@
+title: Windows New Service Installed
+id: a1b2c3d4-0004-4e5f-8a9b-000000000004
+status: experimental
+description: >
+  Detects the installation of a new Windows service via Event ID 7045 from the System log.
+  Attackers install services to persist on compromised systems and to execute code with
+  elevated SYSTEM privileges. Any new service installation outside a known software
+  deployment event should be investigated, particularly if the binary path points to a
+  user-writable directory.
+references:
+  - https://attack.mitre.org/techniques/T1543/003/
+  - https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-7045
+author: John Medina
+date: 2026/04/29
+tags:
+  - attack.persistence
+  - attack.privilege_escalation
+  - attack.t1543.003
+logsource:
+  product: windows
+  service: system
+detection:
+  selection:
+    EventID: 7045
+  filter_system_paths:
+    ImagePath|contains|any:
+      - 'C:\Windows\System32\'
+      - 'C:\Windows\SysWOW64\'
+      - 'C:\Program Files\'
+      - 'C:\Program Files (x86)\'
+  condition: selection and not filter_system_paths
+falsepositives:
+  - Software installers that register services from standard installation directories
+    (these are filtered out by the ImagePath filter above)
+  - Legitimate admin-installed tools with non-standard install locations
+  - Security agents and monitoring tools installed outside Program Files
+fields:
+  - ServiceName
+  - ImagePath
+  - ServiceType
+  - StartType
+  - AccountName
+level: high

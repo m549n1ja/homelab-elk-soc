@@ -103,17 +103,17 @@ This is not meant to be a production blueprint. It is a hands-on lab focused on 
 | # | Rule Name | Main Signal | Severity | MITRE ATT&CK | Status |
 |---:|---|---|---|---|---|
 | 1 | Brute Force: Failed Logins | Event ID 4625 | Medium | T1110.001 | Verified firing |
-| 2 | New User Account Created | Event ID 4720 | High | T1136.001 | Active |
-| 3 | Suspicious PowerShell Execution | Event ID 4104 | High | T1059.001 | Active |
-| 4 | New Scheduled Task | Event ID 4698 | High | T1053.005 | Active |
-| 5 | RDP Login from External IP | Event ID 4624, Logon Type 10 | Critical | T1021.001 | Active |
-| 6 | Firewall Deny Spike | OPNsense block events | High | T1046 | Active |
-| 7 | New Service Installed | Event ID 7045 | High | T1543.003 | Active |
+| 2 | New User Account Created | Event ID 4720 | High | T1136.001 | Created / pending full validation |
+| 3 | Suspicious PowerShell Execution | Event ID 4104 | High | T1059.001 | Created / pending full validation |
+| 4 | New Scheduled Task | Event ID 4698 | High | T1053.005 | Created / pending full validation |
+| 5 | RDP Login from External IP | Event ID 4624, Logon Type 10 | Critical | T1021.001 | Created / pending full validation |
+| 6 | Firewall Deny Spike | OPNsense block events | High | T1046 | Created / pending full validation |
+| 7 | New Service Installed | Event ID 7045 | High | T1543.003 | Created / pending full validation |
 | 8 | Privilege Escalation: Special Logon | Event ID 4672 | High | T1068 | Verified firing |
-| 9 | DNS Tunneling Indicator | DNS TXT activity | High | T1071.004 | Active |
-| 10 | File Integrity Alert: `/etc/passwd` | Auditbeat FIM | High | T1565.001 | Active |
+| 9 | DNS Tunneling Indicator | DNS TXT activity | High | T1071.004 | Created / pending full validation |
+| 10 | File Integrity Alert: `/etc/passwd` | Auditbeat FIM | High | T1565.001 | Created / pending full validation |
 
-Rule logic is being organized under [`rules/kql/`](rules/kql/) with Sigma versions planned under [`rules/sigma/`](rules/sigma/).
+Full KQL rule documentation: [`rules/kql/`](rules/kql/) | Sigma rules: [`rules/sigma/`](rules/sigma/)
 
 ---
 
@@ -192,6 +192,18 @@ This lab was built to learn and validate SOC workflows, not to represent a harde
 
 5. **Add automated validation scripts.**  
    Simple checks for service health, listening ports, index growth, and recent events would make the lab easier to maintain and rebuild.
+
+---
+
+## Repository Documents
+
+| Document | Description |
+|----------|-------------|
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Full step-by-step build guide — prerequisites, installation, configuration, and validation |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Network topology, VM specs, data flow diagrams, and design decisions |
+| [CURRENT_LIMITATIONS.md](CURRENT_LIMITATIONS.md) | Honest accounting of what this lab does and does not do, and what comes next |
+| [CHANGELOG.md](CHANGELOG.md) | Dated build history |
+| [evidence/EVIDENCE_INDEX.md](evidence/EVIDENCE_INDEX.md) | All 35 screenshots mapped to phases and detection rules |
 
 ---
 

@@ -1,0 +1,43 @@
+title: Windows Suspicious PowerShell Script Block Execution
+id: a1b2c3d4-0003-4e5f-8a9b-000000000003
+status: experimental
+description: >
+  Detects PowerShell script block logging events (Event ID 4104) containing keywords
+  associated with download cradles, execution policy bypasses, encoded commands, and
+  common living-off-the-land attack patterns.
+  Requires PowerShell Script Block Logging enabled via Group Policy.
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+  - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_logging_windows
+author: John Medina
+date: 2026/04/29
+tags:
+  - attack.execution
+  - attack.t1059.001
+logsource:
+  product: windows
+  service: powershell
+detection:
+  selection:
+    EventID: 4104
+    ScriptBlockText|contains|any:
+      - 'Invoke-Expression'
+      - 'IEX('
+      - 'IEX '
+      - 'DownloadString'
+      - 'DownloadFile'
+      - 'EncodedCommand'
+      - '-enc '
+      - '-ExecutionPolicy Bypass'
+      - '-WindowStyle Hidden'
+      - 'FromBase64String'
+  condition: selection
+falsepositives:
+  - Legitimate IT admin scripts using dynamic execution
+  - Software deployment tools using encoded commands for package delivery
+  - Security tools invoking PowerShell with bypass flags during installation
+fields:
+  - ScriptBlockText
+  - ScriptBlockId
+  - Path
+level: high

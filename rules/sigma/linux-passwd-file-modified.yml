@@ -1,0 +1,40 @@
+title: Linux Critical Authentication File Modified
+id: a1b2c3d4-0005-4e5f-8a9b-000000000005
+status: experimental
+description: >
+  Detects modifications to critical Linux authentication and authorization files
+  monitored by Auditbeat file integrity module. Changes to /etc/passwd, /etc/shadow,
+  or /etc/sudoers outside authorized maintenance windows may indicate an attacker
+  adding a backdoor account, modifying password hashes, or granting elevated sudo access.
+references:
+  - https://attack.mitre.org/techniques/T1565/001/
+  - https://www.elastic.co/guide/en/beats/auditbeat/current/auditbeat-module-file_integrity.html
+author: John Medina
+date: 2026/04/29
+tags:
+  - attack.impact
+  - attack.persistence
+  - attack.t1565.001
+logsource:
+  product: linux
+  category: file_event
+detection:
+  selection:
+    EventModule: 'file_integrity'
+    EventType: 'change'
+    FilePath|contains|any:
+      - '/etc/passwd'
+      - '/etc/shadow'
+      - '/etc/sudoers'
+  condition: selection
+falsepositives:
+  - Package manager operations (apt/yum) adding system users for new packages
+  - Legitimate user administration by authorized administrators
+  - System updates modifying authentication configuration
+fields:
+  - file.path
+  - file.hash.sha256
+  - event.action
+  - host.name
+  - '@timestamp'
+level: high
