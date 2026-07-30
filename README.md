@@ -4,7 +4,7 @@
 
 I built this lab because I wanted to understand what a SOC analyst actually works with every day — not just read about it. Coming from a background where operational readiness and attention to detail are non-negotiable, I wanted to prove that I could stand up a real detection environment from scratch: configure the stack, pull logs from multiple sources, write rules that actually fire, and document the process the way I would in a real environment.
 
-This repository is the result: a single-node ELK 8.x SIEM ingesting logs from a Windows endpoint with Sysmon, a Linux endpoint, and an OPNsense firewall. The lab currently contains 29,000+ indexed events, 10 custom KQL detection rules mapped to MITRE ATT&CK, and 3 Kibana dashboards. Everything was built on commodity hardware using VMware, with no cloud shortcuts.
+This repository is the result: a single-node ELK 8.x SIEM ingesting logs from a Windows endpoint with Sysmon, a Linux endpoint, and an OPNsense firewall. The lab currently contains 29,000+ indexed events, 10 custom Kibana Query Language (KQL) detection rules mapped to MITRE ATT&CK, and 3 Kibana dashboards. Everything was built on commodity hardware using VMware, with no cloud shortcuts.
 
 ---
 
@@ -30,7 +30,7 @@ This is not meant to be a production blueprint. It is a hands-on lab focused on 
 | Windows visibility | Collected Windows Security events and Sysmon telemetry from a Windows 10 endpoint |
 | Linux visibility | Collected Linux system logs and Auditbeat file integrity monitoring data |
 | Network visibility | Forwarded OPNsense firewall syslog events into the ELK pipeline |
-| Detection engineering | Created 10 custom KQL detection rules for common SOC use cases |
+| Detection engineering | Created 10 custom detection rules in Kibana Query Language (KQL) for common SOC use cases |
 | MITRE mapping | Mapped each detection rule to a relevant MITRE ATT&CK technique or sub-technique |
 | Alert validation | Confirmed selected rules firing in Kibana Security and captured screenshot evidence |
 | Dashboarding | Built dashboards for security overview, authentication activity, and network traffic |
@@ -113,7 +113,7 @@ This is not meant to be a production blueprint. It is a hands-on lab focused on 
 | 9 | DNS Tunneling Indicator | DNS TXT activity | High | T1071.004 | Created / pending full validation |
 | 10 | File Integrity Alert: `/etc/passwd` | Auditbeat FIM | High | T1565.001 | Created / pending full validation |
 
-Full KQL rule documentation: [`rules/kql/`](rules/kql/) | Sigma rules: [`rules/sigma/`](rules/sigma/)
+Full Kibana Query Language (KQL) rule documentation: [`rules/kql/`](rules/kql/) | Sigma rules: [`rules/sigma/`](rules/sigma/)
 
 ---
 
