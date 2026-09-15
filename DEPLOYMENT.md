@@ -566,6 +566,70 @@ To create: `Kibana → Dashboards → Create dashboard → Add panel`
 
 ---
 
+## Phase 7 — Optional: Onboard an Additional Endpoint (e.g., Your Main PC)
+
+The lab as documented above ingests from two purpose-built VMs (WIN10-ENDPOINT, LINUX-ENDPOINT) and OPNsense. The pipeline is not limited to those three sources — any additional host running a Beat agent that points at `192.168.10.100:5044` will be picked up, tagged, and indexed the same way. This phase covers connecting a real physical machine — such as your everyday desktop or laptop ("main PC") — as a new log source, rather than a lab VM.
+
+**I cannot reach your PC or LAN directly from this environment.** This session runs in an isolated cloud container with no route to your `192.168.10.0/24` network, so the steps below are commands you run yourself, on your own machine and on OPNsense.
+
+### 7.1 Network prerequisites
+
+- Your main PC must be able to reach `192.168.10.100:5044` (Logstash). If it's already a device on the same LAN segment as the lab (plugged into the same switch/AP behind OPNsense), no extra routing is needed.
+- If your main PC lives on a **different** subnet or VLAN than the lab, add a firewall rule on OPNsense (`Firewall → Rules`) permitting your PC's IP to reach `192.168.10.100` on TCP 5044. Do not simply move the lab to NAT — that defeats OPNsense's role as a log source (see ARCHITECTURE.md, Design Decisions).
+- Give the PC a stable identifier: either a static IP or a DHCP reservation in OPNsense, so its events are easy to filter in Kibana over time.
+
+### 7.2 If your main PC runs Windows
+
+Follow the same steps as **Phase 4.3–4.7** (WIN10-ENDPOINT), applied to your physical machine instead of a VM:
+
+1. Enable Advanced Audit Policy → Logon/Logoff → Audit Logon (Success + Failure) — required for Event 4625.
+2. Install Sysmon64 with a config (e.g., SwiftOnSecurity) **before** configuring Winlogbeat.
+3. Install Winlogbeat, and point it at Logstash, not Elasticsearch:
+   ```yaml
+   winlogbeat.event_logs:
+     - name: Security
+       ignore_older: 72h
+     - name: System
+     - name: Microsoft-Windows-Sysmon/Operational
+
+   output.logstash:
+     hosts: ["192.168.10.100:5044"]
+   ```
+4. Optionally enable PowerShell Script Block Logging (Rule 03) via `gpedit.msc`.
+5. Start the service and verify from ELK-SIEM:
+   ```bash
+   curl -k -u "${ES_USER}:${ES_PASSWORD}" "https://localhost:9200/winlogbeat-*/_count"
+   ```
+
+### 7.3 If your main PC runs Linux (or macOS via Filebeat)
+
+Follow the same steps as **Phase 4.10–4.11** (LINUX-ENDPOINT):
+
+1. Add the Elastic 8.x package repo and install Filebeat.
+2. Enable the `system` module (or point `filebeat.inputs` at whatever logs you care about).
+3. Set the output to Logstash, not Elasticsearch:
+   ```yaml
+   output.logstash:
+     hosts: ["192.168.10.100:5044"]
+   ```
+4. Optionally install Auditbeat with the `file_integrity` module for FIM on sensitive paths.
+5. Start the service(s) and verify from ELK-SIEM:
+   ```bash
+   curl -k -u "${ES_USER}:${ES_PASSWORD}" "https://localhost:9200/filebeat-*/_count"
+   ```
+
+### 7.4 Confirm the new source in Kibana
+
+1. `Discover` → select the `winlogbeat-*` or `filebeat-*` data view → filter on `agent.hostname` or `host.name` to isolate events from the new machine.
+2. Existing detection rules (`rules/kql/`) already query by index pattern, not by hostname, so they will automatically evaluate events from the new endpoint — no rule changes required.
+3. Because this is now a personal machine and not a disposable lab VM, review `evidence/REDACTION.md` before capturing any screenshots that include it — redact hostnames, usernames, or IPs that identify you personally beyond what you intend to share.
+
+### 7.5 A note on scope
+
+Treat a personal/production machine on your SOC lab differently than the disposable lab VMs: don't run the test-generation scripts in `scripts/windows/` or `scripts/linux/` (e.g., `create-test-user.ps1`, `generate-failed-logons.ps1`) against it — those are meant for the throwaway WIN10-ENDPOINT and LINUX-ENDPOINT VMs, not a machine you actually use.
+
+---
+
 ## Validation Commands
 
 Run these from the ELK-SIEM (192.168.10.100) to verify the full stack:

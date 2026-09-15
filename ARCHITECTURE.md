@@ -174,6 +174,9 @@ Beat agents could ship directly to Elasticsearch, but routing everything through
 **4. LINUX-ENDPOINT as the OPNsense syslog relay.**
 OPNsense sends syslog over UDP 514 to the LINUX-ENDPOINT, which Filebeat picks up and forwards to Logstash. An alternative would be a dedicated syslog collector (rsyslog → Logstash), but using Filebeat keeps the architecture consistent — every log source uses a Beat agent as its forwarding mechanism.
 
+**5. Log sources are not limited to lab VMs.**
+`beats.conf` tags events by `[agent][type]`, not by hostname or VM identity, so any additional host — including a physical, non-lab machine such as a personal main PC — can be onboarded as a log source simply by installing the appropriate Beat agent and pointing it at `192.168.10.100:5044`. See DEPLOYMENT.md, Phase 7.
+
 ---
 
 ## Production Considerations

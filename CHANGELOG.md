@@ -10,6 +10,11 @@ All notable changes to this project are documented here.
 - Remaining 5 Sigma rules (rules 4–10)
 - Full alert-firing validation for all 10 rules
 
+### Added
+- `DEPLOYMENT.md` — Phase 7: guide for onboarding an additional, non-lab endpoint (e.g., a personal main PC) as a log source
+- `ARCHITECTURE.md` — design decision noting log sources are identified by Beat agent type, not VM/hostname, so any additional host can be added
+- `README.md` — pointer to Phase 7 for extending the pipeline beyond the documented lab sources
+
 ---
 
 ## 2026-04-29

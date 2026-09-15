@@ -96,6 +96,8 @@ This is not meant to be a production blueprint. It is a hands-on lab focused on 
 
 **Current indexed event count:** 29,000+ events as of 2026-04-29.
 
+The pipeline isn't limited to the sources above — any additional host running a Beat agent pointed at `192.168.10.100:5044` is tagged and indexed the same way. See [DEPLOYMENT.md, Phase 7](DEPLOYMENT.md#phase-7--optional-onboard-an-additional-endpoint-eg-your-main-pc) for connecting a real machine (e.g., a personal "main PC") as a log source.
+
 ---
 
 ## Detection Rules
